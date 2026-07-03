@@ -70,10 +70,24 @@ Because the table values index the *deduplicated* unique-tile list, tile dedupli
 - Text coordinates are in tiles; a line of tall text occupies two tile rows. 18 characters fit per framed dialogue line.
 - Avatars and `\007` text color are not supported.
 
+## Compatibility with other plugins (engineAlt)
+
+`src/TallTextPlugin/engineAlt/` holds alternative engine builds for use alongside plugins that replace stock engine files (same convention as UiAltDisplayTextPlugin):
+
+| Variant | Use together with |
+|---|---|
+| `engineAlt/ContinuousScenePlugin/` | ContinuousScenePlugin |
+| `engineAlt/ScreenScrollPlugin/` | ScreenScrollPlugin |
+
+Those plugins scroll the hardware background map and track the visible origin in `bkg_offset_x` / `bkg_offset_y` (plus a `current_text_layer` global in their ui.h). The variant renderer starts background-layer text from the scrolled origin and wraps positions within the 32×32 map — including the tall bottom-half tile, which is written one wrapped map row below its top half. Overlay/dialogue rendering is unchanged.
+
+To use one, replace the contents of the plugin's `engine/` folder with the matching `engineAlt/<PluginName>/` contents (the patched/distributable form selects the variant automatically through `engineAltRules` once generated with the plugin patch builder). Verified compiling against both host plugins with gb-studio-cli 4.3.0.
+
 ## Repo layout
 
 ```
 src/TallTextPlugin/          the plugin (copy into your project's plugins/ folder)
+  engineAlt/                 compatibility engine variants (see above)
 font/dw3-tall.png            ready-made tall font extracted from DW3
 tools/extract_dw3_font.js    regenerates the font from the DW3 disassembly
 tallTextPluginExample/       buildable example project (background draw,

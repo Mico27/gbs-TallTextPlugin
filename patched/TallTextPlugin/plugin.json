@@ -1,0 +1,43 @@
+{
+  "type": "enginePlugin",
+  "name": "Tall Text Plugin",
+  "author": "Mico27",
+  "version": "4.3.0",
+  "gbsVersion": ">=4.3.0",
+  "description": "16px-tall text: each character is two vertically stacked tiles streamed to VRAM, with an LRU tile-pair cache.",
+  "url": "https://github.com/Mico27/gbs-TallTextPlugin",
+  "engineAltRules": [
+    {
+      "when": {
+        "additionalPlugins": [
+          "Mico27/ContinuousScenePlugin"
+        ]
+      },
+      "use": "Cont"
+    },
+    {
+      "when": {
+        "additionalPlugins": [
+          "ContinuousScenePlugin"
+        ]
+      },
+      "use": "Cont"
+    },
+    {
+      "when": {
+        "additionalPlugins": [
+          "Mico27/ScreenScrollPlugin"
+        ]
+      },
+      "use": "Scr"
+    },
+    {
+      "when": {
+        "additionalPlugins": [
+          "ScreenScrollPlugin"
+        ]
+      },
+      "use": "Scr"
+    }
+  ]
+}

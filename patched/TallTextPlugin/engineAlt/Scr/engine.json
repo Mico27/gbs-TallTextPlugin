@@ -1,0 +1,52 @@
+{
+  "version": "4.3.0-e1",
+  "fields": [
+    {
+      "key": "ttx_first_tile",
+      "label": "First VRAM tile reserved for tall text",
+      "description": "First background tile index (0-255) reserved for tall character tile pairs. Each cached character uses two consecutive tiles from this range. Must not overlap tiles used by the scene background (0 to 191 depending on the scene) or the UI/dialogue tiles (192-255).",
+      "group": "Tall Text",
+      "type": "slider",
+      "cType": "UBYTE",
+      "defaultValue": 112,
+      "min": 0,
+      "max": 255
+    },
+    {
+      "key": "ttx_last_tile",
+      "label": "Last VRAM tile reserved for tall text",
+      "description": "Last background tile index (inclusive) reserved for tall character tile pairs. The cache holds (range size / 2) characters, at most 64. A two-line dialogue can show up to 36 distinct characters, so reserve at least 72 tiles.",
+      "group": "Tall Text",
+      "type": "slider",
+      "cType": "UBYTE",
+      "defaultValue": 191,
+      "min": 0,
+      "max": 255
+    },
+    {
+      "key": "ttx_tile_placement",
+      "label": "Tile placement (VRAM bank)",
+      "description": "Which VRAM tile data bank the cached character tiles are uploaded to. 'Bank 1 only' and 'Alternate' are Game Boy Color features (Color Only mode, or Color modes running on GBC): they free up or double the bank 0 budget by storing glyphs in bank 1, selected per tilemap cell through attribute bit 3. On DMG hardware the plugin always falls back to bank 0. Alternate placement doubles the characters a given tile range can hold.",
+      "group": "Tall Text",
+      "type": "select",
+      "options": [
+        [0, "Bank 0 only"],
+        [1, "Bank 1 only (Color)"],
+        [2, "Alternate bank 0/1 (Color)"]
+      ],
+      "cType": "UBYTE",
+      "defaultValue": 0
+    },
+    {
+      "key": "TTX_CACHE_MAX",
+      "label": "Character cache capacity (entries)",
+      "description": "Maximum number of characters the tile-pair LRU cache can track. Each entry costs 3 bytes of WRAM and, when in use, two consecutive VRAM tiles from the reserved range. The usable entry count at runtime is the smaller of this value and (reserved tile range / 2). Lower it to reclaim WRAM, raise it only alongside a larger reserved tile range.",
+      "group": "Tall Text",
+      "type": "slider",
+      "cType": "define",
+      "defaultValue": 64,
+      "min": 4,
+      "max": 128
+    }
+  ]
+}
