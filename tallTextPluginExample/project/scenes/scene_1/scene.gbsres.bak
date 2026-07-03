@@ -1,0 +1,132 @@
+{
+  "_resourceType": "scene",
+  "id": "a1355f17-85a1-4b2f-b0f4-66a0cb496e6e",
+  "_index": 0,
+  "name": "Scene 1",
+  "backgroundId": "dbe6b39e-356e-46de-a81e-f54d52926814",
+  "tilesetId": "d540bf77-4936-4752-ab6e-da981968cdd2",
+  "width": 20,
+  "height": 18,
+  "type": "TOPDOWN",
+  "colorModeOverride": "none",
+  "paletteIds": [],
+  "spritePaletteIds": [],
+  "collisions": "",
+  "autoFadeSpeed": null,
+  "symbol": "scene_1",
+  "x": 104,
+  "y": 32,
+  "script": [
+    {
+      "command": "EVENT_TTX_RESET_CACHE",
+      "args": {
+        "__collapse": true
+      },
+      "id": "b27ebb57-77be-4291-89f0-595aa2e013ab"
+    },
+    {
+      "command": "EVENT_SET_FONT",
+      "args": {
+        "fontId": "3d7a91f2-4c8b-4e2a-9f61-7b5a2c8d94e1",
+        "__collapse": true
+      },
+      "id": "3a47fa80-af34-45a4-81f8-f64ed3fc1565"
+    },
+    {
+      "command": "EVENT_TTX_DISPLAY_TEXT_BKG",
+      "args": {
+        "text": "TALL TEXT DEMO\n(DW3-GBC STYLE)\nEach letter is two\nstacked tiles: one\n32-byte VRAM copy!\nPress A",
+        "x": 1,
+        "y": 1,
+        "__comment": false
+      },
+      "id": "4ce28239-707a-4b01-b184-ca0ca125ece7"
+    },
+    {
+      "command": "EVENT_FADE_IN",
+      "args": {
+        "speed": "2",
+        "__collapse": true
+      },
+      "id": "e8cca05f-6afc-434b-a9ed-33d526086f5d"
+    },
+    {
+      "command": "EVENT_AWAIT_INPUT",
+      "args": {
+        "input": [
+          "a"
+        ]
+      },
+      "id": "5631462c-4c80-476c-8e53-78c778674c4d"
+    },
+    {
+      "command": "EVENT_GBVM_SCRIPT",
+      "args": {
+        "script": "VM_CALL_NATIVE b_scroll_repaint, _scroll_repaint"
+      },
+      "id": "cd332813-5c39-4178-8ccd-84ac631f3ac2"
+    },
+    {
+      "command": "EVENT_IDLE",
+      "args": {},
+      "id": "db2cf17b-e917-4db1-a92f-e22c2c1bb3f4"
+    },
+    {
+      "command": "EVENT_TTX_DISPLAY_TEXT_SPEED",
+      "args": {
+        "text": "!S3!This line types out\nat the current text\nspeed. Hold A or B\nto fast-forward.\nWatch the VRAM in a\ndebugger to see the\ntile pairs stream.\nPress A",
+        "layer": "background",
+        "x": 1,
+        "y": 1
+      },
+      "id": "fb376bc0-1a62-43fc-9130-3473f245597f"
+    },
+    {
+      "command": "EVENT_AWAIT_INPUT",
+      "args": {
+        "input": [
+          "a"
+        ]
+      },
+      "id": "93dd00af-ba06-45bf-ab5c-55050502d9d9"
+    },
+    {
+      "command": "EVENT_GBVM_SCRIPT",
+      "args": {
+        "script": "VM_CALL_NATIVE b_scroll_repaint, _scroll_repaint"
+      },
+      "id": "0b202425-52cc-40f9-a42f-65f03e7d18fc"
+    },
+    {
+      "command": "EVENT_IDLE",
+      "args": {},
+      "id": "e2b413c7-a6ef-434f-9ca1-a5173b760b8c"
+    },
+    {
+      "command": "EVENT_TTX_DISPLAY_DIALOGUE",
+      "args": {
+        "text": [
+          "Thou hast found\nthe TALL TEXT box!\nIt scrolls just\nlike the stock box\nwhile each letter\nstands 16px tall,\nas in DW3 on GBC.\nPress A to close."
+        ],
+        "minHeight": 6,
+        "maxHeight": 8,
+        "textX": 1,
+        "textY": 1,
+        "textHeight": 4,
+        "position": "bottom",
+        "clearPrevious": true,
+        "showFrame": true,
+        "speedIn": -1,
+        "speedOut": -1,
+        "closeWhen": "key",
+        "closeButton": "a"
+      },
+      "id": "dca9073d-4ae8-4d95-ba84-4a6e3b1520d9"
+    }
+  ],
+  "playerHit1Script": [],
+  "playerHit2Script": [],
+  "playerHit3Script": [],
+  "playerSpriteSheetId": "11b5452b-187c-43a3-afb1-a1f4f74ffda2",
+  "autoFadeEventCollapse": false
+}

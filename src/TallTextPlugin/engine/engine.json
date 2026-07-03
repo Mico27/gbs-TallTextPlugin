@@ -1,0 +1,38 @@
+{
+  "version": "4.3.0-e1",
+  "fields": [
+    {
+      "key": "ttx_first_tile",
+      "label": "First VRAM tile reserved for tall text",
+      "description": "First background tile index (0-255) reserved for tall character tile pairs. Each cached character uses two consecutive tiles from this range. Must not overlap tiles used by the scene background (0 to 191 depending on the scene) or the UI/dialogue tiles (192-255).",
+      "group": "Tall Text",
+      "type": "slider",
+      "cType": "UBYTE",
+      "defaultValue": 112,
+      "min": 0,
+      "max": 255
+    },
+    {
+      "key": "ttx_last_tile",
+      "label": "Last VRAM tile reserved for tall text",
+      "description": "Last background tile index (inclusive) reserved for tall character tile pairs. The cache holds (range size / 2) characters, at most 64. A two-line dialogue can show up to 36 distinct characters, so reserve at least 72 tiles.",
+      "group": "Tall Text",
+      "type": "slider",
+      "cType": "UBYTE",
+      "defaultValue": 191,
+      "min": 0,
+      "max": 255
+    },
+    {
+      "key": "TTX_CACHE_MAX",
+      "label": "Character cache capacity (entries)",
+      "description": "Maximum number of characters the tile-pair LRU cache can track. Each entry costs 3 bytes of WRAM and, when in use, two consecutive VRAM tiles from the reserved range. The usable entry count at runtime is the smaller of this value and (reserved tile range / 2). Lower it to reclaim WRAM, raise it only alongside a larger reserved tile range.",
+      "group": "Tall Text",
+      "type": "slider",
+      "cType": "define",
+      "defaultValue": 64,
+      "min": 4,
+      "max": 128
+    }
+  ]
+}
