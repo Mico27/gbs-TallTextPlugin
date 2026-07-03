@@ -24,6 +24,20 @@
       "max": 255
     },
     {
+      "key": "ttx_tile_placement",
+      "label": "Tile placement (VRAM bank)",
+      "description": "Which VRAM tile data bank the cached character tiles are uploaded to. 'Bank 1 only' and 'Alternate' are Game Boy Color features (Color Only mode, or Color modes running on GBC): they free up or double the bank 0 budget by storing glyphs in bank 1, selected per tilemap cell through attribute bit 3. On DMG hardware the plugin always falls back to bank 0. Alternate placement doubles the characters a given tile range can hold.",
+      "group": "Tall Text",
+      "type": "select",
+      "options": [
+        [0, "Bank 0 only"],
+        [1, "Bank 1 only (Color)"],
+        [2, "Alternate bank 0/1 (Color)"]
+      ],
+      "cType": "UBYTE",
+      "defaultValue": 0
+    },
+    {
       "key": "TTX_CACHE_MAX",
       "label": "Character cache capacity (entries)",
       "description": "Maximum number of characters the tile-pair LRU cache can track. Each entry costs 3 bytes of WRAM and, when in use, two consecutive VRAM tiles from the reserved range. The usable entry count at runtime is the smaller of this value and (reserved tile range / 2). Lower it to reclaim WRAM, raise it only alongside a larger reserved tile range.",

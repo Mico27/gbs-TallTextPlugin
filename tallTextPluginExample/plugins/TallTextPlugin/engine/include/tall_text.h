@@ -7,6 +7,7 @@
 // engine fields (order must match engine.json)
 extern UBYTE ttx_first_tile;
 extern UBYTE ttx_last_tile;
+extern UBYTE ttx_tile_placement;   // 0 = bank 0, 1 = bank 1, 2 = alternate (CGB only)
 
 extern UBYTE ttx_text_drawn;
 extern UBYTE ttx_current_text_speed;

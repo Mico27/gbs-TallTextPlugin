@@ -54,7 +54,7 @@ Because the table values index the *deduplicated* unique-tile list, tile dedupli
 | Tall Text: Draw To Overlay | `ttx_display_text` | instant draw to the overlay/window layer |
 | Tall Text: Draw At Text Speed | `ttx_display_text_speed` | modal typewriter on either layer |
 | Tall Text: Reset Tile Cache | `ttx_reset_cache` | call in every scene's On Init |
-| Tall Text: Set Tile Range | `ttx_set_tile_range` | change the reserved VRAM tile range at runtime |
+| Tall Text: Set Tile Range | `ttx_set_tile_range` | change the reserved VRAM tile range and tile placement (bank 0 / bank 1 / alternate) at runtime |
 
 ## Usage rules
 
@@ -62,6 +62,7 @@ Because the table values index the *deduplicated* unique-tile list, tile dedupli
 - **Call "Tall Text: Reset Tile Cache" in every scene's On Init** — scene loads overwrite VRAM and there is no plugin hook for scene loads.
 - Engine fields `ttx_first_tile` / `ttx_last_tile` (defaults **112-191** = 80 tiles = 40 cached characters) set the reserved background tile range. It must not collide with scene background tiles (0 upward) or stock UI/dialogue tiles (192-255). A full two-line dialogue can show up to 36 distinct characters at once, so keep at least ~72 tiles reserved; the cache uses at most 2 × `TTX_CACHE_MAX` tiles.
 - Engine field `TTX_CACHE_MAX` (default **64**, range 4–128) caps how many characters the LRU cache can track. It is a compile-time define: each entry costs 3 bytes of WRAM, so lowering it reclaims WRAM; raising it only helps together with a larger reserved tile range (usable entries = min(`TTX_CACHE_MAX`, range/2)).
+- Engine field `ttx_tile_placement` (default **Bank 0 only**) selects the VRAM tile data bank on Game Boy Color: on CGB the tilemap attribute bit 3 picks the bank per map cell, and the plugin sets it per character cell. **Bank 1 only (Color)** stores every glyph pair in bank 1, so the reserved indices stop competing with bank-0 scene tiles entirely; **Alternate bank 0/1 (Color)** stores entries in both banks, doubling the characters the range can hold (usable entries = min(`TTX_CACHE_MAX`, range size)). Meant for Color Only mode (also works in mixed color modes on GBC hardware); on DMG the plugin automatically falls back to bank 0. In Color Only mode scene backgrounds may themselves use bank-1 tiles — pick a range whose bank-1 indices are free too.
 - Text coordinates are in tiles; a line of tall text occupies two tile rows. 18 characters fit per framed dialogue line.
 - Avatars and `\007` text color are not supported.
 
@@ -72,12 +73,15 @@ src/TallTextPlugin/          the plugin (copy into your project's plugins/ folde
 font/dw3-tall.png            ready-made tall font extracted from DW3
 tools/extract_dw3_font.js    regenerates the font from the DW3 disassembly
 tallTextPluginExample/       buildable example project (background draw,
-                             typewriter, scrolling dialogue)
+                             typewriter, scrolling dialogue; mono mode)
+tallTextPluginColorExample/  Color Only mode example demonstrating the tile
+                             placement feature: Bank 1 only, then Alternate
+                             bank 0/1 via the Set Tile Range event
 ```
 
-The example was verified building to ROM with gb-studio-cli 4.3.0 (`build/rom/tall_text_demo.gb`).
+Both examples were verified building to ROM with gb-studio-cli 4.3.0 (`build/rom/tall_text_demo.gb` and `build/rom/tall_text_color_demo.gbc`, the latter CGB-only).
 
-> ⚠️ The example project's `plugins/TallTextPlugin` is a **copy** of `src/TallTextPlugin` — re-copy after editing the source, or the example silently builds the old code.
+> ⚠️ Each example project's `plugins/TallTextPlugin` is a **copy** of `src/TallTextPlugin` — re-copy into both examples after editing the source, or the examples silently build the old code.
 
 ## Memory Footprint
 

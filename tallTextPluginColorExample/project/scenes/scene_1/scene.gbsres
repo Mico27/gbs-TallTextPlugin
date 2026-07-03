@@ -22,7 +22,7 @@
       "args": {
         "__collapse": true
       },
-      "id": "b27ebb57-77be-4291-89f0-595aa2e013ab"
+      "id": "e1667131-4dc4-41cc-8b0d-ecdcb359ceb3"
     },
     {
       "command": "EVENT_SET_FONT",
@@ -30,17 +30,26 @@
         "fontId": "3d7a91f2-4c8b-4e2a-9f61-7b5a2c8d94e1",
         "__collapse": true
       },
-      "id": "3a47fa80-af34-45a4-81f8-f64ed3fc1565"
+      "id": "6f9b7d65-4637-4bb7-9251-61b691798864"
+    },
+    {
+      "command": "EVENT_TTX_SET_TILE_RANGE",
+      "args": {
+        "firstTile": 0,
+        "lastTile": 128,
+        "placement": 1
+      },
+      "id": "3985277f-c4e8-41e1-8c3b-ebf68108ad67"
     },
     {
       "command": "EVENT_TTX_DISPLAY_TEXT_BKG",
       "args": {
-        "text": "TALL TEXT DEMO\n(DW3-GBC STYLE)\nEach letter is two\nstacked tiles: one\n32-byte VRAM copy!\nPress A",
+        "text": "COLOR ONLY MODE\nBANK 1 PLACEMENT\nGlyph pairs live in\nVRAM bank 1 via\nattr bit 3\nat range 0-64\nPress A",
         "x": 1,
         "y": 1,
         "__comment": false
       },
-      "id": "4ce28239-707a-4b01-b184-ca0ca125ece7"
+      "id": "9b5992a4-3fc5-4d78-b0d7-7c6bdb7b3609"
     },
     {
       "command": "EVENT_FADE_IN",
@@ -48,7 +57,7 @@
         "speed": "2",
         "__collapse": true
       },
-      "id": "e8cca05f-6afc-434b-a9ed-33d526086f5d"
+      "id": "fded4c1c-9f9f-4f9c-a5b6-ce514cc7dc8e"
     },
     {
       "command": "EVENT_AWAIT_INPUT",
@@ -57,29 +66,38 @@
           "a"
         ]
       },
-      "id": "5631462c-4c80-476c-8e53-78c778674c4d"
+      "id": "f35617ce-debc-4a43-9110-164f78ad6d38"
     },
     {
       "command": "EVENT_GBVM_SCRIPT",
       "args": {
         "script": "VM_CALL_NATIVE b_scroll_repaint, _scroll_repaint"
       },
-      "id": "cd332813-5c39-4178-8ccd-84ac631f3ac2"
+      "id": "f3025ea3-5f55-4752-9bab-26e0f156ae40"
     },
     {
       "command": "EVENT_IDLE",
       "args": {},
-      "id": "db2cf17b-e917-4db1-a92f-e22c2c1bb3f4"
+      "id": "c8701769-edfb-4afa-a42c-a0d9b6b7efa3"
+    },
+    {
+      "command": "EVENT_TTX_SET_TILE_RANGE",
+      "args": {
+        "firstTile": 204,
+        "lastTile": 255,
+        "placement": 2
+      },
+      "id": "eea080cf-f0b0-49a7-bfd6-ec30b50041ca"
     },
     {
       "command": "EVENT_TTX_DISPLAY_TEXT_SPEED",
       "args": {
-        "text": "!S3!This line types out\nat the current text\nspeed. Hold A or B\nto fast-forward.\nWatch the VRAM in a\ndebugger to see the\ntile pairs stream.\nPress A",
+        "text": "ALTERNATE MODE\nTile pairs go to\nbank 0 and bank 1\nin turn: the range\nholds twice the\ncharacters.\n\nPress A",
         "layer": "background",
         "x": 1,
         "y": 1
       },
-      "id": "fb376bc0-1a62-43fc-9130-3473f245597f"
+      "id": "c9b43743-b226-4615-bf25-fe27fbeda9a7"
     },
     {
       "command": "EVENT_AWAIT_INPUT",
@@ -88,25 +106,56 @@
           "a"
         ]
       },
-      "id": "93dd00af-ba06-45bf-ab5c-55050502d9d9"
+      "id": "d3ab983b-c388-44a0-8320-9faa4d253db2"
     },
     {
       "command": "EVENT_GBVM_SCRIPT",
       "args": {
         "script": "VM_CALL_NATIVE b_scroll_repaint, _scroll_repaint"
       },
-      "id": "0b202425-52cc-40f9-a42f-65f03e7d18fc"
+      "id": "e80a79a0-9945-4485-aa04-a126a1454ed8"
     },
     {
       "command": "EVENT_IDLE",
       "args": {},
-      "id": "e2b413c7-a6ef-434f-9ca1-a5173b760b8c"
+      "id": "744646bd-da3c-4598-8883-8fd6c279dd4c"
+    },
+    {
+      "command": "EVENT_TTX_DISPLAY_TEXT_SPEED",
+      "args": {
+        "text": "You can even use\nthe default ui\nrange to draw text\nIf you dont want to\nstep over sprites\nor background tiles\n\nPress A",
+        "layer": "background",
+        "x": 1,
+        "y": 1
+      },
+      "id": "1cb36c9d-1bb5-42d2-b526-2cb4bbc32405"
+    },
+    {
+      "command": "EVENT_AWAIT_INPUT",
+      "args": {
+        "input": [
+          "a"
+        ]
+      },
+      "id": "b9f6838e-4c36-4986-9ccb-b09a01614aa9"
+    },
+    {
+      "command": "EVENT_GBVM_SCRIPT",
+      "args": {
+        "script": "VM_CALL_NATIVE b_scroll_repaint, _scroll_repaint"
+      },
+      "id": "332ad1d5-14c4-4ce6-bed7-c73ab6d8a1bb"
+    },
+    {
+      "command": "EVENT_IDLE",
+      "args": {},
+      "id": "3a4378fc-52d9-4695-8bc6-3b24c71ca8ce"
     },
     {
       "command": "EVENT_TTX_DISPLAY_DIALOGUE",
       "args": {
         "text": [
-          "Thou hast found\nthe TALL TEXT box!\nIt scrolls just\nlike the stock box\nwhile each letter\nstands 16px tall,\nas in DW3 on GBC.\nPress A to close."
+          "This tall dialogue\nuses alternate\nplacement: even\nentries in bank 0,\nodd go in bank 1.\nPress A to close."
         ],
         "minHeight": 6,
         "maxHeight": 8,
@@ -121,7 +170,7 @@
         "closeWhen": "key",
         "closeButton": "a"
       },
-      "id": "dca9073d-4ae8-4d95-ba84-4a6e3b1520d9"
+      "id": "4483594c-f558-4136-99b7-ff1d25b56d7d"
     }
   ],
   "playerHit1Script": [],

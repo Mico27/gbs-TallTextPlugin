@@ -44,6 +44,7 @@
 // engine fields (order must match engine.json)
 UBYTE ttx_first_tile;
 UBYTE ttx_last_tile;
+UBYTE ttx_tile_placement;
 
 UBYTE ttx_text_drawn;
 UBYTE ttx_current_text_speed;
@@ -55,7 +56,23 @@ UBYTE ttx_current_text_speed;
 #endif
 #define TTX_NULL 0xFFu
 
-// cache entry i owns VRAM tiles (ttx_first_tile + 2*i) and (+ 2*i + 1)
+// where cached tiles live in VRAM (ttx_tile_placement engine field).
+// bank 1 placements only take effect on CGB (color-only or mixed mode on
+// color hardware): the tilemap attribute bit 3 selects the tile data bank,
+// so bank-1 glyphs coexist with scene tiles of the same index in bank 0.
+// TTX_PLACEMENT_ALTERNATE spreads entries across both banks, doubling the
+// characters a given tile range can hold.
+#define TTX_PLACEMENT_BANK0     0
+#define TTX_PLACEMENT_BANK1     1
+#define TTX_PLACEMENT_ALTERNATE 2
+
+// placement in effect for the current cache generation (bank-1 modes fall
+// back to bank 0 when not running on CGB hardware)
+static UBYTE ttx_placement_eff;
+
+// bank-0-only: cache entry i owns VRAM tiles (ttx_first_tile + 2*i) and
+// (+ 2*i + 1); alternate placement maps entries 2k/2k+1 onto the same pair
+// of tile indices in banks 0 and 1 respectively
 static UBYTE ttx_key[TTX_CACHE_MAX];     // character the pair was rendered from
 static UBYTE ttx_next[TTX_CACHE_MAX];    // towards least recently used
 static UBYTE ttx_prev[TTX_CACHE_MAX];    // towards most recently used
@@ -73,10 +90,20 @@ static UBYTE * ttx_dest_base;
 
 void ttx_cache_reset(void) BANKED {
     UBYTE n;
+#ifdef CGB
+    ttx_placement_eff = (_is_CGB) ? ttx_tile_placement : TTX_PLACEMENT_BANK0;
+#else
+    ttx_placement_eff = TTX_PLACEMENT_BANK0;
+#endif
     if (ttx_last_tile < ttx_first_tile) {
         n = TTX_CACHE_MAX;
     } else {
-        n = (ttx_last_tile - ttx_first_tile + 1u) >> 1;
+        UBYTE range = ttx_last_tile - ttx_first_tile + 1u;   // 0 means the full 256 tiles
+        if (ttx_placement_eff == TTX_PLACEMENT_ALTERNATE) {
+            n = range & 0xFEu;          // one entry per tile pair per bank
+        } else {
+            n = range >> 1;
+        }
         if ((n == 0) || (n > TTX_CACHE_MAX)) n = TTX_CACHE_MAX;
     }
     ttx_size = n;
@@ -94,25 +121,45 @@ static void ttx_check_font(UBYTE font_idx) {
     }
 }
 
+// top-half VRAM tile index owned by cache entry i (bottom half is + 1)
+static UBYTE ttx_entry_tile(UBYTE i) {
+    if (ttx_placement_eff == TTX_PLACEMENT_ALTERNATE) return ttx_first_tile + (i & 0xFEu);
+    return ttx_first_tile + (i << 1);
+}
+
+// VRAM tile data bank the pair of cache entry i lives in
+static UBYTE ttx_entry_bank(UBYTE i) {
+    if (ttx_placement_eff == TTX_PLACEMENT_BANK1) return 1;
+    if (ttx_placement_eff == TTX_PLACEMENT_ALTERNATE) return i & 0x01u;
+    return 0;
+}
+
 // upload both halves of a character to the pair of VRAM tiles.
 // the DW3 grid layout puts the top half of character n (n = ch - 32) at
 // image tile ((n >> 4) * 32 + (n & 15)) and the bottom half 16 tiles later;
 // the automatic recode table is indexed by (32 + image tile position) for
 // fonts under 16 tile rows and resolves tile deduplication.
-static void ttx_load_glyph_tiles(UBYTE tile, UBYTE ch) {
+static void ttx_load_glyph_tiles(UBYTE tile, UBYTE bank, UBYTE ch) {
     UBYTE n = ch - 0x20u;
     UWORD idx = 32u + (((UWORD)(n & 0xF0u)) << 1) + (n & 0x0Fu);
     UBYTE top = ReadBankedUBYTE(vwf_current_font_desc.recode_table + idx, vwf_current_font_bank);
     UBYTE bot = ReadBankedUBYTE(vwf_current_font_desc.recode_table + idx + 16u, vwf_current_font_bank);
+    (void)bank;
+#ifdef CGB
+    if (bank) VBK_REG = 1;
+#endif
     SetBankedBkgData(tile, 1, vwf_current_font_desc.bitmaps + ((UWORD)top << 4), vwf_current_font_bank);
     SetBankedBkgData(tile + 1u, 1, vwf_current_font_desc.bitmaps + ((UWORD)bot << 4), vwf_current_font_bank);
+#ifdef CGB
+    if (bank) VBK_REG = 0;
+#endif
 }
 
 // look the character up in the LRU list; on hit hoist the entry to the head
 // and reuse its tile pair, on miss allocate a fresh pair (or evict the least
 // recently used one) and render the character into it.
-// returns the top-half VRAM tile index (bottom half is + 1).
-static UBYTE ttx_get_char_tile(UBYTE ch) {
+// returns the cache entry index (tile/bank via ttx_entry_tile/ttx_entry_bank).
+static UBYTE ttx_get_char_entry(UBYTE ch) {
     UBYTE i, p, nx;
     for (i = ttx_head; i != TTX_NULL; i = ttx_next[i]) {
         if (ttx_key[i] == ch) {
@@ -127,7 +174,7 @@ static UBYTE ttx_get_char_tile(UBYTE ch) {
                 ttx_prev[ttx_head] = i;
                 ttx_head = i;
             }
-            return ttx_first_tile + (i << 1);
+            return i;
         }
     }
     // miss
@@ -150,15 +197,18 @@ static UBYTE ttx_get_char_tile(UBYTE ch) {
     if (ttx_head != TTX_NULL) ttx_prev[ttx_head] = i;
     ttx_head = i;
     if (ttx_tail == TTX_NULL) ttx_tail = i;
-    ttx_load_glyph_tiles(ttx_first_tile + (i << 1), ch);
-    return ttx_first_tile + (i << 1);
+    ttx_load_glyph_tiles(ttx_entry_tile(i), ttx_entry_bank(i), ch);
+    return i;
 }
 
-inline void ttx_set_tile(UBYTE * addr, UBYTE tile) {
+// write one tilemap cell; on CGB the attribute byte carries the palette and
+// the tile data bank (bit 3) the glyph was uploaded to
+inline void ttx_set_tile(UBYTE * addr, UBYTE tile, UBYTE bank) {
+    (void)bank;
 #ifdef CGB
     if (_is_CGB) {
         VBK_REG = 1;
-        set_vram_byte(addr, overlay_priority | (text_palette & 0x07u));
+        set_vram_byte(addr, overlay_priority | (text_palette & 0x07u) | (bank ? 0x08u : 0x00u));
         VBK_REG = 0;
     }
 #endif
@@ -166,13 +216,15 @@ inline void ttx_set_tile(UBYTE * addr, UBYTE tile) {
 }
 
 static void ttx_emit_char(UBYTE ch) {
-    UBYTE tile = ttx_get_char_tile(ch);
+    UBYTE entry = ttx_get_char_entry(ch);
+    UBYTE tile = ttx_entry_tile(entry);
+    UBYTE bank = ttx_entry_bank(entry);
     // wrap around within the 32-tile map row instead of bleeding into the next line
     if (((UBYTE)ttx_dest_ptr >> 5) != ((UBYTE)ttx_dest_base >> 5)) {
         ttx_dest_ptr -= 32u;
     }
-    ttx_set_tile(ttx_dest_ptr, tile);              // top half
-    ttx_set_tile(ttx_dest_ptr + 32u, tile + 1u);   // bottom half, map row below
+    ttx_set_tile(ttx_dest_ptr, tile, bank);              // top half
+    ttx_set_tile(ttx_dest_ptr + 32u, tile + 1u, bank);   // bottom half, map row below
     ttx_dest_ptr++;
 }
 
@@ -409,7 +461,8 @@ void ttx_reset_cache(SCRIPT_CTX * THIS) OLDCALL BANKED {
 void ttx_set_tile_range(SCRIPT_CTX * THIS) OLDCALL BANKED {
     (void)THIS;
     // FN_ARG0 is the argument pushed last (top of VM stack)
-    ttx_first_tile = *(UBYTE *)VM_REF_TO_PTR(FN_ARG1);
-    ttx_last_tile  = *(UBYTE *)VM_REF_TO_PTR(FN_ARG0);
+    ttx_first_tile      = *(UBYTE *)VM_REF_TO_PTR(FN_ARG2);
+    ttx_last_tile       = *(UBYTE *)VM_REF_TO_PTR(FN_ARG1);
+    ttx_tile_placement  = *(UBYTE *)VM_REF_TO_PTR(FN_ARG0);
     ttx_cache_reset();
 }

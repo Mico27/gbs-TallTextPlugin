@@ -1,0 +1,150 @@
+{
+  "_resourceType": "scene",
+  "id": "a1355f17-85a1-4b2f-b0f4-66a0cb496e6e",
+  "_index": 0,
+  "name": "Scene 1",
+  "backgroundId": "dbe6b39e-356e-46de-a81e-f54d52926814",
+  "tilesetId": "d540bf77-4936-4752-ab6e-da981968cdd2",
+  "width": 20,
+  "height": 18,
+  "type": "TOPDOWN",
+  "colorModeOverride": "none",
+  "paletteIds": [],
+  "spritePaletteIds": [],
+  "collisions": "",
+  "autoFadeSpeed": null,
+  "symbol": "scene_1",
+  "x": 104,
+  "y": 32,
+  "script": [
+    {
+      "command": "EVENT_TTX_RESET_CACHE",
+      "args": {
+        "__collapse": true
+      },
+      "id": "e1667131-4dc4-41cc-8b0d-ecdcb359ceb3"
+    },
+    {
+      "command": "EVENT_SET_FONT",
+      "args": {
+        "fontId": "3d7a91f2-4c8b-4e2a-9f61-7b5a2c8d94e1",
+        "__collapse": true
+      },
+      "id": "6f9b7d65-4637-4bb7-9251-61b691798864"
+    },
+    {
+      "command": "EVENT_TTX_SET_TILE_RANGE",
+      "args": {
+        "firstTile": 112,
+        "lastTile": 191,
+        "placement": 1
+      },
+      "id": "3985277f-c4e8-41e1-8c3b-ebf68108ad67"
+    },
+    {
+      "command": "EVENT_TTX_DISPLAY_TEXT_BKG",
+      "args": {
+        "text": "COLOR ONLY MODE\nBANK 1 PLACEMENT\nGlyph pairs live in\nVRAM bank 1 via\nattr bit 3!\nPress A",
+        "x": 1,
+        "y": 1,
+        "__comment": false
+      },
+      "id": "9b5992a4-3fc5-4d78-b0d7-7c6bdb7b3609"
+    },
+    {
+      "command": "EVENT_FADE_IN",
+      "args": {
+        "speed": "2",
+        "__collapse": true
+      },
+      "id": "fded4c1c-9f9f-4f9c-a5b6-ce514cc7dc8e"
+    },
+    {
+      "command": "EVENT_AWAIT_INPUT",
+      "args": {
+        "input": [
+          "a"
+        ]
+      },
+      "id": "f35617ce-debc-4a43-9110-164f78ad6d38"
+    },
+    {
+      "command": "EVENT_GBVM_SCRIPT",
+      "args": {
+        "script": "VM_CALL_NATIVE b_scroll_repaint, _scroll_repaint"
+      },
+      "id": "f3025ea3-5f55-4752-9bab-26e0f156ae40"
+    },
+    {
+      "command": "EVENT_IDLE",
+      "args": {},
+      "id": "c8701769-edfb-4afa-a42c-a0d9b6b7efa3"
+    },
+    {
+      "command": "EVENT_TTX_SET_TILE_RANGE",
+      "args": {
+        "firstTile": 112,
+        "lastTile": 191,
+        "placement": 2
+      },
+      "id": "eea080cf-f0b0-49a7-bfd6-ec30b50041ca"
+    },
+    {
+      "command": "EVENT_TTX_DISPLAY_TEXT_SPEED",
+      "args": {
+        "text": "!S3!ALTERNATE MODE\nTile pairs go to\nbank 0 and bank 1\nin turn: the range\nholds twice the\ncharacters.\nPress A",
+        "layer": "background",
+        "x": 1,
+        "y": 1
+      },
+      "id": "c9b43743-b226-4615-bf25-fe27fbeda9a7"
+    },
+    {
+      "command": "EVENT_AWAIT_INPUT",
+      "args": {
+        "input": [
+          "a"
+        ]
+      },
+      "id": "d3ab983b-c388-44a0-8320-9faa4d253db2"
+    },
+    {
+      "command": "EVENT_GBVM_SCRIPT",
+      "args": {
+        "script": "VM_CALL_NATIVE b_scroll_repaint, _scroll_repaint"
+      },
+      "id": "e80a79a0-9945-4485-aa04-a126a1454ed8"
+    },
+    {
+      "command": "EVENT_IDLE",
+      "args": {},
+      "id": "744646bd-da3c-4598-8883-8fd6c279dd4c"
+    },
+    {
+      "command": "EVENT_TTX_DISPLAY_DIALOGUE",
+      "args": {
+        "text": [
+          "This tall dialogue\nuses alternate\nplacement: even\nentries in bank 0,\nodd go in bank 1.\nPress A to close."
+        ],
+        "minHeight": 6,
+        "maxHeight": 8,
+        "textX": 1,
+        "textY": 1,
+        "textHeight": 4,
+        "position": "bottom",
+        "clearPrevious": true,
+        "showFrame": true,
+        "speedIn": -1,
+        "speedOut": -1,
+        "closeWhen": "key",
+        "closeButton": "a"
+      },
+      "id": "4483594c-f558-4136-99b7-ff1d25b56d7d"
+    }
+  ],
+  "playerHit1Script": [],
+  "playerHit2Script": [],
+  "playerHit3Script": [],
+  "playerSpriteSheetId": "11b5452b-187c-43a3-afb1-a1f4f74ffda2",
+  "autoFadeEventCollapse": false
+}
