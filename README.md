@@ -4,6 +4,10 @@ GB Studio 4.3.0 engine plugin that renders **16px-tall (8x16) text** using the t
 
 ![Font](font/dw3-tall.png)
 
+
+https://github.com/user-attachments/assets/7ceef128-eb02-4d69-bc6a-6ef856e2f34e
+
+
 ## The Dragon Warrior III technique
 
 Reference disassembly: `dragon-warrior-3-gbc/game/src/text/draw.asm`.
