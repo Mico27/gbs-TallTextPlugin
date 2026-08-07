@@ -1,6 +1,6 @@
 # gbs-TallTextPlugin
 
-**Version 4.3.0 — Requires GB Studio ≥ 4.3.0**
+**Version 4.3.1 — Requires GB Studio ≥ 4.3.0**
 
 A GB Studio engine plugin that renders **16px-tall (8×16) text** using the technique from *Dragon Warrior III* (GBC): every character is a double-height glyph made of two vertically stacked 8×8 tiles, streamed into VRAM as it is printed.
 
@@ -31,6 +31,8 @@ Each character is two 8×8 tiles stacked vertically, so a line of tall text occu
 ### The character tile cache
 
 Tall glyphs are uploaded to a reserved range of VRAM tiles as they are printed, and kept in a **cache keyed by character** — each cache entry owns one tile pair. Repeated characters reuse their pair instead of consuming new tiles; when the range is full, the least recently used character's pair is evicted.
+
+The cache can be turned off entirely with the **Enable character tile cache** engine setting. Its bookkeeping is then compiled out — 195 bytes of WRAM and 348 bytes of ROM come back — and each character is rendered into the next tile pair of the reserved range, cycling round-robin. Repeated characters no longer share a pair, so the range has to be big enough for every character on screen at once (two tiles each).
 
 ### The reserved tile range
 
@@ -87,9 +89,10 @@ Found under **Settings → Tall Text**.
 | **First VRAM tile reserved for tall text** | 112 | First background tile index reserved for glyph pairs. |
 | **Last VRAM tile reserved for tall text** | 191 | Last reserved tile index, inclusive. |
 | **Tile placement (VRAM bank)** | Bank 0 only | Which VRAM tile data bank glyph pairs are uploaded to: Bank 0 only, Bank 1 only (Color), or Alternate bank 0/1 (Color). |
-| **Character cache capacity (entries)** | 64 | How many characters the cache can track, 4–128. Each entry costs 3 bytes of WRAM, so lowering it reclaims WRAM. Raising it only helps together with a larger reserved tile range. |
+| **Enable character tile cache** | On | Keeps rendered tile pairs in an LRU cache so repeated characters reuse their pair. Turn it off to compile the cache out (−195 B WRAM, −348 B ROM) and render every character into the next reserved tile pair round-robin. |
+| **Character cache capacity (entries)** | 64 | How many characters the cache can track, 4–128. Each entry costs 3 bytes of WRAM, so lowering it reclaims WRAM. Raising it only helps together with a larger reserved tile range. Ignored when the cache is off. |
 
-Usable cache entries are `min(cache capacity, range size / 2)` — or `min(cache capacity, range size)` with *Alternate bank 0/1*.
+Usable cache entries are `min(cache capacity, range size / 2)` — or `min(cache capacity, range size)` with *Alternate bank 0/1*. With the cache disabled the capacity setting drops out and the whole reserved range is used.
 
 ---
 
@@ -97,8 +100,9 @@ Usable cache entries are `min(cache capacity, range size / 2)` — or `min(cache
 
 - **The reserved range must not collide** with your scene background tiles (0 upward) or GB Studio's UI/dialogue tiles (192–255). The cache uses at most 2 × the cache capacity in tiles.
 - **The cache can overflow.** When it is full, the least recently used character's pair is reused, so text drawn long ago can visually corrupt if it is still on screen while a lot of new text is drawn.
-- **Reset the cache on every scene load** — there is no automatic hook for it.
-- **Switching fonts resets the cache** (via the Set Font event or a `\002` in-text switch).
+- **Reset the cache on every scene load** — there is no automatic hook for it. *Reset Tile Cache* also rewinds the round-robin cursor when the cache is disabled, so keep calling it either way.
+- **Switching fonts resets the cache** (via the Set Font event or a `\002` in-text switch). With the cache disabled there is nothing to invalidate, so a font switch costs nothing.
+- **With the cache disabled, every character is re-uploaded on every use** — two 16-byte VRAM tile copies per character, where a cache hit was two tilemap writes. It is a WRAM/ROM trade, not a speed one.
 - Text coordinates are in tiles, and each line of tall text occupies **two** tile rows. **18 characters** fit per framed dialogue line; a dialogue defaults to min height 6, max height 8, scroll height 4 — two visible lines.
 - **Avatars and the `\007` text colour code are not supported.** The full control-code set of the stock renderer is otherwise handled (speed, font switch, gotoxy, wait-for-input, palette); `\010` direction is skipped.
 - Compatible variants are included for use alongside **ContinuousScenePlugin** and **ScreenScrollPlugin**, and are selected automatically.
@@ -139,8 +143,10 @@ move.
 
 | Setting | Bank 0 | WRAM | Banked ROM |
 |---|---|---|---|
+| Enable character tile cache | — | 195 B | 348 B |
 | Character cache capacity (entries) *(slider 4–128, default 64)* | — | 3 B/step | — |
 
+- **Enable character tile cache**: measured from two full ROM builds of `tallTextPluginExample` at the default 64-entry capacity (link map `_DATA`+`_INITIALIZED` and `_CODE_n` totals). Turning it off also removes the capacity slider's cost, since the LRU tables are what that slider sizes.
 - **Character cache capacity (entries)**: going from 4 to 128 moves WRAM by +372 B.
 
 <details><summary>How these were measured</summary>
@@ -169,7 +175,7 @@ Measured against the stock GB Studio **4.3.0-e1** engine (per-file SDCC compile 
 | WRAM | +211 bytes |
 | ROM | +2,128 bytes (DMG) / +2,309 bytes (CGB) |
 
-- **WRAM:** 211 bytes — the tile-pair cache arrays (3 × 64 = 192 bytes) plus renderer and engine-field state. Scales with the **Character cache capacity** engine setting at 3 bytes per entry (default 64 entries; e.g. 32 entries saves 96 bytes).
+- **WRAM:** 211 bytes — the tile-pair cache arrays (3 × 64 = 192 bytes) plus renderer and engine-field state. Scales with the **Character cache capacity** engine setting at 3 bytes per entry (default 64 entries; e.g. 32 entries saves 96 bytes), and drops by 195 bytes when **Enable character tile cache** is turned off.
 - **ROM:** the figure above is the renderer code only — the tall font asset you add to the project compiles its own data on top (~2 KB for the 96-character DW3 font after tile deduplication).
 - **Engine WRAM headroom:** the stock GB Studio 4.3.0 engine leaves about **854 bytes** of WRAM free (usable engine WRAM is 7,776 bytes at 0xC0A0–0xDF00; the stock engine uses 6,922 bytes). With this plugin installed roughly **643 bytes** remain. This figure does not depend on how many global variables your project defines: the script memory array has a fixed size of VM_HEAP_SIZE + (VM_MAX_CONTEXTS × VM_CONTEXT_STACK_SIZE) words — 768 + 16 × 64 = 1,792 words (3,584 bytes) with stock engine settings.
 - **SRAM:** not used.
