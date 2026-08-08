@@ -91,6 +91,8 @@ Found under **Settings → Tall Text**.
 | **Tile placement (VRAM bank)** | Bank 0 only | Which VRAM tile data bank glyph pairs are uploaded to: Bank 0 only, Bank 1 only (Color), or Alternate bank 0/1 (Color). |
 | **Enable character tile cache** | On | Keeps rendered tile pairs in an LRU cache so repeated characters reuse their pair. Turn it off to compile the cache out (−195 B WRAM, −348 B ROM) and render every character into the next reserved tile pair round-robin. |
 | **Character cache capacity (entries)** | 64 | How many characters the cache can track, 4–128. Each entry costs 3 bytes of WRAM, so lowering it reclaims WRAM. Raising it only helps together with a larger reserved tile range. Ignored when the cache is off. |
+| **Replace stock text rendering** | Off | Compiles GB Studio's own text renderer out and points the stock *Display Dialogue*, *Display Text* and *Menu* events at this plugin instead. Frees 1,629 B of ROM (1,965 B in Color mode) and tiles 204–255. See below. |
+| **Menu cursor row** | Lower tile of the line | Which tile of a two-row menu line the cursor sits on. Lower is level with the baseline, upper reads as slightly raised. |
 
 Usable cache entries are `min(cache capacity, range size / 2)` — or `min(cache capacity, range size)` with *Alternate bank 0/1*. With the cache disabled the capacity setting drops out and the whole reserved range is used.
 
@@ -109,6 +111,61 @@ Usable cache entries are `min(cache capacity, range size / 2)` — or `min(cache
 
 ---
 
+
+### Replacing the stock text renderer
+
+GB Studio's own renderer normally sits in the ROM alongside this plugin's, even in a
+project where every visible string is drawn by the plugin. **Replace stock text
+rendering** removes it.
+
+With the setting on, the plugin ships a copy of the engine's `ui.c` whose text renderer
+is compiled out, and supplies `ui_draw_text_buffer_char` itself. Nothing calls the
+plugin explicitly — the stock engine's own `ui_update()` resolves to it, so everything
+that used to draw stock text now draws tall text:
+
+| | |
+|---|---|
+| **Display Dialogue**, **Display Text** | render in tall text, without swapping in this plugin's events |
+| **Menu** | renders in this plugin's text, with the cursor rows corrected — see below |
+
+Two things you get back:
+
+- **1,629 bytes of ROM** (**1,965** in a Color build), measured on the module, minus 8
+  bytes for the forwarder. Plus 5 bytes of WRAM.
+- **Tiles 204–255.** They were the stock renderer's scratch buffer, and the usual advice
+  is to keep clear of them unless nothing on screen uses stock text. With the stock
+  renderer gone there is nothing left to collide with, so those 52 tiles can go straight
+  into the reserved range.
+
+**Menus work with or without the setting.** Two things are wrong with the stock Menu
+event once lines are two rows tall: its cursor steps one 8px row per option, falling a
+row further behind each time, and its window is sized at compile time for stock rows so
+the frame comes out half as tall as the text in it.
+
+The driver lives in this plugin as **`<prefix>_ui_run_menu`**, a copy of the stock one
+with the cursor stride as a parameter. Option *n* occupies rows `(n-1)*stride + 1` through
+`+ stride`, and which of them the cursor takes is the
+**Menu cursor row** setting: the lower tile sits level with the baseline, the upper one
+reads as slightly raised, and which suits depends on where your font puts its glyphs in
+the cell. At stride 1 there is only one row and both choices are the stock position. It is always compiled, under its own name, so:
+
+| | Menu driver used |
+|---|---|
+| this plugin’s **Menu** event | calls `<prefix>_ui_run_menu` directly, through a native |
+| stock **Menu** event, setting off | stock `ui_run_menu`, unchanged and still correct for stock text |
+| stock **Menu** event, setting on | `ui_run_menu` is rewired to `<prefix>_ui_run_menu` |
+
+The event calls the native rather than emitting `VM_CHOICE`, because that instruction
+always calls `ui_run_menu` — which is only this plugin’s when the setting is on. Going
+direct is what lets the event work either way. It also means no `.MENUITEM` table is
+emitted: the options are a single column, so the driver lays them out itself.
+
+With the setting off, the bundled `ui.c` is the engine's own file byte for byte, so it
+costs nothing and changes nothing. It does mean this plugin now overrides `ui.c`, so it
+cannot be combined with another plugin that overrides the same file unless one of them
+ships an `engineAlt` variant for the other — the ContinuousScene and ScreenScroll
+variants shipped here already do.
+
 ## Events Reference
 
 All events appear under the **Tall Text** group in the script editor.
@@ -121,10 +178,15 @@ All events appear under the **Tall Text** group in the script editor.
 | **Tall Text: Draw At Text Speed** | Types the text out at the current text speed on either layer. Blocks until done. |
 | **Tall Text: Reset Tile Cache** | Forgets all cached glyph pairs. Call this in each scene's On Init. |
 | **Tall Text: Set Tile Range** | Changes the reserved VRAM tile range and tile placement at runtime. |
+| **Tall Text: Menu** | A menu sized and stepped for two-row lines, drawn with this plugin. Works with or without *Replace stock text rendering*. |
 
 ---
 
 ## Media
+
+Both examples end with a **menu** built from the plugin’s own Menu event — a window
+sized for two-row lines, a cursor that steps to match, and the chosen option left in the
+`Item_Id` variable (zero if B cancelled it).
 
 Two example projects are included:
 

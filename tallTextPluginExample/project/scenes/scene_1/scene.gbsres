@@ -123,6 +123,43 @@
         "__section": "text"
       },
       "id": "dca9073d-4ae8-4d95-ba84-4a6e3b1520d9"
+    },
+    {
+      "command": "EVENT_TTX_MENU",
+      "args": {
+        "variable": "0",
+        "items": 3,
+        "option1": "SWORD",
+        "option2": "SHIELD",
+        "option3": "POTION",
+        "layout": "full",
+        "cancelOnLastOption": false,
+        "cancelOnB": true,
+        "__collapse": true
+      },
+      "id": "55d9384d-2ad0-4312-b869-11da13f8787d"
+    },
+    {
+      "command": "EVENT_TTX_DISPLAY_DIALOGUE",
+      "args": {
+        "minHeight": 6,
+        "maxHeight": 8,
+        "textX": 1,
+        "textY": 1,
+        "textHeight": 4,
+        "position": "bottom",
+        "clearPrevious": true,
+        "showFrame": true,
+        "speedIn": -1,
+        "speedOut": -1,
+        "closeWhen": "key",
+        "closeButton": "a",
+        "__section": "text",
+        "text": [
+          "!S5!Thy choice is in\nthe Item_Id\nvariable: one, two\nor three, or zero\nif thou pressed B.\nPress A to close."
+        ]
+      },
+      "id": "166f9e04-e760-46ab-a0dd-50bf4498e941"
     }
   ],
   "playerHit1Script": [],
