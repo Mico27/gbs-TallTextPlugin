@@ -76,8 +76,6 @@ A tall font is a standard GB Studio font asset (`assets/fonts/name.png`, no `.js
 - **A non-transparent white background, RGB (240,240,240)** — pure white counts as transparent and makes the font compiler trim and left-shift the glyphs, destroying the layout.
 - At most **120 characters** (15 tile rows); a 96-character ASCII font at 128×96px is the normal case.
 
-`tools/extract_dw3_font.js` regenerates `font/dw3-tall.png` from the Dragon Warrior III disassembly's font sheet. 76 ASCII characters have DW3 glyphs; the rest are blank.
-
 ---
 
 ## Engine Settings
