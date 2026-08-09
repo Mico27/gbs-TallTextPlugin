@@ -298,3 +298,29 @@ the core compiles, move it independently of this plugin.
 
 </details>
 <!-- BANK0:END -->
+
+## Changelog
+
+Grouped by the date each change was merged into the official
+[gb-studio-plugins](https://github.com/gb-studio-dev/gb-studio-plugins) repository.
+
+### 2026-08-08
+
+- Added menu support and a "replace stock UI" engine setting.
+- Added variable display to the example project, plus a font generator tool.
+- Version bump.
+
+### 2026-08-07
+
+- Added an engine setting to enable or disable the tile cache.
+- README updates.
+
+### 2026-08-02
+
+- Regenerated the compatibility patches and rewrote the README.
+
+### 2026-07-03
+
+- Initial release: DW3-style 16px-tall text using a tile-pair LRU cache.
+- Colour-only VRAM bank 1 support.
+- ScreenScroll and ContinuousScene plugin compatibility.
