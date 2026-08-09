@@ -111,7 +111,6 @@ Usable cache entries are `min(cache capacity, range size / 2)` — or `min(cache
 
 ---
 
-
 ### Replacing the stock text renderer
 
 GB Studio's own renderer normally sits in the ROM alongside this plugin's, even in a
@@ -165,6 +164,30 @@ costs nothing and changes nothing. It does mean this plugin now overrides `ui.c`
 cannot be combined with another plugin that overrides the same file unless one of them
 ships an `engineAlt` variant for the other — the ContinuousScene and ScreenScroll
 variants shipped here already do.
+
+## The Font Generator
+
+`src/*/tools/make_tall_font.js` builds this plugin’s font asset from a `.ttf`, `.otf`
+or a GNU Unifont `.hex` file. Double-click **Make Tall Font.bat** for a guided run, or drag
+a font onto it.
+
+```bash
+node src/*/tools/make_tall_font.js --font pixelfont.ttf --project path/to/myGame
+```
+
+It writes `assets/fonts/<name>.png` (8×16 cells, 128×96) plus its `.gbsres` sidecar,
+keeping the id and symbol of any sidecar already there — so regenerating a font does not
+break the scene references or your Default Font setting.
+
+Embedded bitmap strikes are read straight out of the font when it has them, which is what
+pixel fonts want; otherwise the outlines are rasterised through GDI+ using the file
+itself, installed or not. Glyphs are measured and shifted as a group to sit inside the whole 8px cell,
+and the tool warns rather than silently clipping when a font is too big for it.
+
+There are no dependencies: PNGs are written with node’s own zlib and `.ttf` files are
+parsed directly.
+
+---
 
 ## Events Reference
 

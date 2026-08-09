@@ -204,7 +204,7 @@
         "closeButton": "a",
         "__section": "text",
         "text": [
-          "!S5!Thy choice is in\nthe Item_Id\nvariable: one, two\nor three, or zero\nif thou pressed B.\nPress A to close."
+          "!S5!Thou hast chosen\nitem %d$00$ of three.\nZero means thou\ndidst press B.\nPress A to close."
         ]
       },
       "id": "40b7aa22-7386-4cc5-9efa-d5119282187b"
